@@ -1,0 +1,60 @@
+﻿@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+	<h1 class="display-4">Welcome</h1>
+	<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+	<button class="btn btn-primary" onclick="sendMessage()">Send</button>
+	<form action="/" method="post">
+		<label for="message">Message</label>
+		<input type="text" id="message" />
+		<input onclick="" type="submit" id="send" value="Send" />
+	</form>
+	<ul id="messages">
+	</ul>
+
+</div>
+<script src="~/aspnet-signalr/signalr.min.js"></script>
+
+<script>
+	const connection = new signalR.HubConnectionBuilder()
+	.withUrl("/chatHub")
+	.build();
+
+	connection.start().catch(error => console.log(error));
+
+	connection.on("OnConnected",(connectionId)=>{
+		console.log(connection);
+	});
+	function sendMessage(){
+
+	connection.invoke("SendMessage","Hello World!");
+
+	}
+
+	document.getElementById('send').addEventListener("click",event=>{
+	console.log(event);
+		var messageInput = document.getElementById('message');
+
+		var messageValue = messageInput.value;
+
+
+		event.preventDefault();
+
+	connection.invoke("SendMessage",messageValue);
+		messageInput.value = '';
+	});
+
+
+	connection.on("RecieveMessage",(message) =>{
+		appendLine(message);
+	});
+
+	function appendLine(line){
+		let li = document.createElement('li');
+		li.innerText = line;
+		document.getElementById('messages').appendChild(li);
+	}
+
+</script>
